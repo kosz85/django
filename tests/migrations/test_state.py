@@ -824,10 +824,8 @@ class ModelStateTests(TestCase):
         new_apps = Apps(['migrations'])
         model_state = ModelState.from_model(MetaclassTestModel)
 
-        try:
-            class_obj = model_state.render(new_apps)
-        except TypeError:
-            raise AssertionError("Not resolved metaclass conflict")
+        # This rises metaclass conflict if it's not done properly
+        class_obj = model_state.render(new_apps)
 
         self.assertEqual(getattr(class_obj, 'mixin_attr', False), True)
 
