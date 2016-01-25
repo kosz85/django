@@ -17,6 +17,7 @@ from django.utils import six
 from django.utils.deprecation import RemovedInDjango20Warning
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
+from django.utils.metaclassmaker import metaclassmaker
 from django.utils.module_loading import import_string
 from django.utils.version import get_docs_version
 
@@ -620,11 +621,19 @@ class ModelState(object):
                 RemovedInDjango20Warning)
 
             # Then, make a Model object (apps.register_model is called in __new__)
-            return type(
-                str(self.name),
-                bases,
-                body,
-            )
+            try:
+                return type(
+                    str(self.name),
+                    bases,
+                    body,
+                )
+            except TypeError:
+                # Fallback to slower version of building classes with multiple metaclass inheritance.
+                return metaclassmaker()(
+                    str(self.name),
+                    bases,
+                    body,
+                )
 
     def get_field_by_name(self, name):
         for fname, field in self.fields:
