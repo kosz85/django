@@ -629,6 +629,12 @@ class ModelState(object):
                 )
             except TypeError:
                 # Fallback to slower version of building classes with multiple metaclass inheritance.
+                # populate once again as it's cleaned?
+                body = {name: field.clone() for name, field in self.fields}
+                body['Meta'] = meta
+                body['__module__'] = "__fake__"
+                # Restore managers
+                body.update(self.construct_managers())
                 return metaclassmaker()(
                     str(self.name),
                     bases,
